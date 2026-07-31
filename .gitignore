@@ -16,6 +16,40 @@ build/
 *.pem
 *.key
 
+# ---------------------------------------------------------------------------
+# Personal data — never commit, never push.
+# Put anything real (diet spreadsheets, Apple Health exports, exported
+# metrics) in private/ and it stays on this machine.
+# ---------------------------------------------------------------------------
+/private/
+/data/
+**/personal/
+
+# Spreadsheets and data dumps anywhere in the tree
+*.xlsx
+*.xlsm
+*.xls
+*.csv
+*.tsv
+*.numbers
+
+# Apple Health export shapes
+export.xml
+export_cda.xml
+apple_health_export/
+**/健康/
+
+# Local databases
+*.sqlite
+*.sqlite3
+*.db
+
+# Escape hatch: fixtures and templates are safe to track
+!*.example.csv
+!*.example.xlsx
+!*.sample.csv
+!**/fixtures/*.csv
+
 # Uploads (Apple Health exports land here at runtime)
 server/uploads/*
 !server/uploads/.gitkeep
