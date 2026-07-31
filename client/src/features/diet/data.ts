@@ -1,0 +1,207 @@
+/**
+ * Placeholder diet plan.
+ *
+ * This is the seam for the real data: when the spreadsheet arrives, only
+ * `MEALS` and `DAILY_TARGET` need to come from the API instead of this file.
+ * Everything below is pure logic over that shape, so the UI will not change.
+ */
+
+export type Macros = {
+  calories: number;
+  protein: number; // grams
+  carbs: number;
+  fat: number;
+};
+
+export type Meal = {
+  id: string;
+  name: string;
+  /** Minutes from midnight, local time. */
+  startMin: number;
+  endMin: number;
+  items: string[];
+  macros: Macros;
+};
+
+const at = (h: number, m = 0) => h * 60 + m;
+
+export const DAILY_TARGET: Macros = {
+  calories: 2400,
+  protein: 165,
+  carbs: 250,
+  fat: 75,
+};
+
+export const MEALS: Meal[] = [
+  {
+    id: "breakfast",
+    name: "Breakfast",
+    startMin: at(7),
+    endMin: at(9, 30),
+    items: ["Oats with berries", "Greek yoghurt", "Black coffee"],
+    macros: { calories: 520, protein: 34, carbs: 68, fat: 12 },
+  },
+  {
+    id: "lunch",
+    name: "Lunch",
+    startMin: at(12),
+    endMin: at(14),
+    items: ["Chicken and rice bowl", "Mixed greens", "Olive oil"],
+    macros: { calories: 760, protein: 52, carbs: 82, fat: 22 },
+  },
+  {
+    id: "snack",
+    name: "Afternoon snack",
+    startMin: at(16),
+    endMin: at(17, 30),
+    items: ["Whey shake", "Banana", "Almonds"],
+    macros: { calories: 380, protein: 33, carbs: 40, fat: 11 },
+  },
+  {
+    id: "dinner",
+    name: "Dinner",
+    startMin: at(19),
+    endMin: at(21),
+    items: ["Salmon fillet", "Sweet potato", "Broccoli"],
+    macros: { calories: 740, protein: 46, carbs: 60, fat: 30 },
+  },
+];
+
+export type MealStatus = "now" | "next" | "done";
+
+export type CurrentMeal = {
+  meal: Meal;
+  status: MealStatus;
+  /** Minutes until it starts (status "next"), or until it ends (status "now"). */
+  minutesAway: number;
+};
+
+const minutesOf = (d: Date) => d.getHours() * 60 + d.getMinutes();
+
+/**
+ * The meal to show right now: the one whose window contains the current time,
+ * otherwise the next one due. After the last meal, wraps to tomorrow's first.
+ */
+export function currentMeal(now: Date): CurrentMeal {
+  const mins = minutesOf(now);
+
+  const active = MEALS.find((m) => mins >= m.startMin && mins < m.endMin);
+  if (active) {
+    return { meal: active, status: "now", minutesAway: active.endMin - mins };
+  }
+
+  const upcoming = MEALS.find((m) => m.startMin > mins);
+  if (upcoming) {
+    return {
+      meal: upcoming,
+      status: "next",
+      minutesAway: upcoming.startMin - mins,
+    };
+  }
+
+  // Past the last meal — point at tomorrow's first.
+  const first = MEALS[0];
+  return {
+    meal: first,
+    status: "next",
+    minutesAway: 24 * 60 - mins + first.startMin,
+  };
+}
+
+/** Everything whose window has closed counts as eaten. */
+export function consumedSoFar(now: Date): Macros {
+  const mins = minutesOf(now);
+  return MEALS.filter((m) => m.endMin <= mins).reduce<Macros>(
+    (sum, m) => ({
+      calories: sum.calories + m.macros.calories,
+      protein: sum.protein + m.macros.protein,
+      carbs: sum.carbs + m.macros.carbs,
+      fat: sum.fat + m.macros.fat,
+    }),
+    { calories: 0, protein: 0, carbs: 0, fat: 0 },
+  );
+}
+
+/* ---------- extras: ad-hoc food added on top of the plan ---------- */
+
+export type ExtraItem = {
+  id: string;
+  name: string;
+  brand?: string;
+  grams: number;
+  /** Macros per 100 g; the eaten amount is derived from `grams`. */
+  per100: Macros;
+  addedAt: string;
+  /**
+   * Set for hand-entered items, where the macros given are the whole portion
+   * rather than a per-100g figure. Stored as grams:100 so the arithmetic is
+   * identical, with this label shown in place of a weight.
+   */
+  portion?: string;
+};
+
+export const EMPTY_MACROS: Macros = {
+  calories: 0,
+  protein: 0,
+  carbs: 0,
+  fat: 0,
+};
+
+/** What this portion actually contributes. */
+export function macrosOf(extra: ExtraItem): Macros {
+  const k = extra.grams / 100;
+  return {
+    calories: Math.round(extra.per100.calories * k),
+    protein: Math.round(extra.per100.protein * k),
+    carbs: Math.round(extra.per100.carbs * k),
+    fat: Math.round(extra.per100.fat * k),
+  };
+}
+
+export function addMacros(a: Macros, b: Macros): Macros {
+  return {
+    calories: a.calories + b.calories,
+    protein: a.protein + b.protein,
+    carbs: a.carbs + b.carbs,
+    fat: a.fat + b.fat,
+  };
+}
+
+export function totalExtras(extras: ExtraItem[]): Macros {
+  return extras.reduce((sum, e) => addMacros(sum, macrosOf(e)), EMPTY_MACROS);
+}
+
+/* Extras are per-day, so the key rolls over at midnight and yesterday's
+   additions never leak into today's totals. */
+const dayKey = (d: Date) =>
+  `system.diet.extras.${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+export function loadExtras(day: Date): ExtraItem[] {
+  try {
+    const raw = localStorage.getItem(dayKey(day));
+    return raw ? (JSON.parse(raw) as ExtraItem[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveExtras(day: Date, extras: ExtraItem[]): void {
+  try {
+    localStorage.setItem(dayKey(day), JSON.stringify(extras));
+  } catch {
+    // Storage unavailable (private mode, quota) — extras just won't persist.
+  }
+}
+
+export function formatWindow(meal: Meal): string {
+  const fmt = (mins: number) =>
+    `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+  return `${fmt(meal.startMin)} – ${fmt(meal.endMin)}`;
+}
+
+export function formatAway(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m ? `${h}h ${m}m` : `${h}h`;
+}

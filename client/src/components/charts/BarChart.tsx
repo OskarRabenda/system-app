@@ -1,0 +1,1 @@
+// Generic bar chart wrapper.

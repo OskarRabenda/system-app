@@ -1,0 +1,1 @@
+// Vite client type references.

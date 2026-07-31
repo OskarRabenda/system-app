@@ -1,0 +1,4 @@
+// Prisma schema (PostgreSQL datasource).
+// Planned models: User, Meal, FoodItem, MacroEntry, TrainingSession, Exercise,
+// WatchMetric, SleepRecord, StressRecord, CalendarEvent, Recommendation.
+// Define models here during implementation.

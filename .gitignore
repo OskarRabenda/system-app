@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+.vite/
+
+# Environment — templates are tracked, real values never are
+.env
+.env.*
+!.env.example
+
+# Secrets / certs
+*.pem
+*.key
+
+# Uploads (Apple Health exports land here at runtime)
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Logs & coverage
+*.log
+npm-debug.log*
+coverage/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# OS / OneDrive artefacts
+.DS_Store
+Thumbs.db
+desktop.ini
+# Office lock files — this repo lives in OneDrive and will hold spreadsheets
+~$*
+
+# Claude Code: keep shared project settings, drop personal and vendored bits.
+# skills-lock.json records installed skills so they can be restored.
+.claude/settings.local.json
+.claude/skills/

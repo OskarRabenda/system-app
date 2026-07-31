@@ -1,0 +1,1250 @@
+/* System — dark control-room ground with a teal vitals accent.
+   Deliberately single-theme: the product is a night-legible instrument panel. */
+:root {
+  --ink: #06070b;
+  --panel: #0d1017;
+  --panel-hi: #141824;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-hi: rgba(255, 255, 255, 0.16);
+  --fog: #828b9e;
+  --text: #e8ecf5;
+  --teal: #54f0d0;
+
+  --r-card: 18px;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: var(--ink);
+  overflow: hidden;
+}
+
+body {
+  color: var(--text);
+  font-family: "Inter", "Helvetica Neue", Arial, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+canvas {
+  display: block;
+}
+
+/* ---------- wavefront reveal ---------- */
+
+/* Outgoing screen. Stays put and unanimated — the mask on the layer above is
+   what moves, so both screens are live for the whole transition. */
+.hero-layer,
+.under-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Catches the click that skips the intro. */
+.hero-hit {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+}
+
+/* Incoming page, revealed through the animated mask written by WaveReveal.
+   Its own scroll container, so it starts at its own scroll position. */
+.wave-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  overflow-y: auto;
+  background: var(--ink);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+/* ---------- dashboard atmosphere ---------- */
+
+/* Flex column so .dash actually stretches to full height. A percentage
+   min-height alone does not resolve here (the parent's height is auto), which
+   left the content stranded near the top instead of centred. */
+.dash-root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  isolation: isolate;
+}
+
+/* Slow-drifting colour behind everything, so the ground is never dead black. */
+.aurora {
+  position: fixed;
+  inset: -25%;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(90px);
+  opacity: 0.5;
+}
+.aurora i {
+  position: absolute;
+  display: block;
+  width: 46vmax;
+  height: 46vmax;
+  border-radius: 50%;
+}
+.aurora-a {
+  left: 8%;
+  top: 6%;
+  background: radial-gradient(circle, rgba(84, 240, 208, 0.16), transparent 68%);
+  animation: driftA 34s ease-in-out infinite;
+}
+.aurora-b {
+  right: 6%;
+  bottom: 4%;
+  background: radial-gradient(circle, rgba(95, 139, 255, 0.16), transparent 68%);
+  animation: driftB 41s ease-in-out infinite;
+}
+
+@keyframes driftA {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6vw, 5vh, 0) scale(1.12);
+  }
+}
+@keyframes driftB {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+  50% {
+    transform: translate3d(-7vw, -4vh, 0) scale(1);
+  }
+}
+
+/* Hovering a card tints the whole page with that section's hue. */
+.bleed {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    55vw circle at var(--mx, 50%) var(--my, 45%),
+    var(--bleed, transparent),
+    transparent 62%
+  );
+  transition:
+    opacity 0.4s ease,
+    background 0.4s ease;
+}
+:root.is-bleeding .bleed {
+  opacity: 0.15;
+}
+
+/* Soft light that follows the pointer and catches the card edges. */
+.spotlight {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 45%),
+    rgba(255, 255, 255, 0.06),
+    transparent 70%
+  );
+}
+
+/* Wordmark carried over from the hero — real extruded geometry, same as the
+   intro letters, in its own small canvas. */
+.brand {
+  position: absolute;
+  left: 1.5rem;
+  top: 1.2rem;
+  z-index: 2;
+  width: 62px;
+  height: 62px;
+  padding: 0;
+  overflow: hidden;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  filter: drop-shadow(0 0 10px rgba(174, 203, 255, 0.35));
+  transition: filter 0.2s ease;
+}
+.brand:hover,
+.brand:focus-visible {
+  filter: drop-shadow(0 0 16px rgba(174, 203, 255, 0.6));
+}
+.brand:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+/* The renderer sizes itself from a ResizeObserver, which can lag (or never
+   fire in a background tab) and leave the canvas at its 300x150 default,
+   spilling over the corner. Pin it to the box. */
+.brand > div,
+.brand canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* ---------- dashboard ---------- */
+
+.dash {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2.4rem;
+  /* width:100% is required, not redundant: `margin:0 auto` on a column-flex
+     item cancels cross-axis stretch, which collapsed this to fit-content and
+     left the cards far narrower than the 940px track. */
+  width: 100%;
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+.ctx {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.55rem;
+  animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: var(--enter-delay, 0ms);
+}
+
+.ctx-greet {
+  margin: 0;
+  font-size: clamp(1.7rem, 3.6vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.ctx-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  margin: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fog);
+  font-variant-numeric: tabular-nums;
+}
+
+.ctx-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--teal);
+  opacity: 0.7;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+@media (max-width: 680px) {
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  min-height: 138px;
+  padding: 1.9rem 1.7rem;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  background: linear-gradient(180deg, var(--panel-hi), var(--panel));
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  cursor: pointer;
+  overflow: hidden;
+  /* Base state is visible on purpose: if the entrance animation never runs
+     (hidden tab, motion disabled), the cards must still be there. The
+     `backwards` fill hides them during the stagger delay instead. */
+  /* Delay is set per element from its distance to the reveal origin, so each
+     card lands exactly as the wavefront passes over it (see DashboardPage). */
+  animation: cardIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: var(--enter-delay, 0ms);
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Accent hairline — with the glyph tile, the only place the section hue shows. */
+.card-rule {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 75%, transparent),
+    transparent
+  );
+  opacity: 0.65;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--line-hi);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent),
+    0 14px 40px rgba(0, 0, 0, 0.5),
+    0 0 34px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.card:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
+.card:active {
+  transform: translateY(-1px) scale(0.995);
+}
+
+.card-emoji {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  font-size: 1.85rem;
+  line-height: 1;
+  border-radius: 16px;
+  transition: transform 0.24s ease;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 26%, transparent);
+  filter: drop-shadow(
+    0 0 12px color-mix(in srgb, var(--accent) 45%, transparent)
+  );
+}
+
+/* Fixed height: the label is optically centred at rest, and the blurb is taken
+   out of flow, so revealing it on hover never resizes a card or jostles its
+   neighbours. */
+/* Must grow, not size to content: the blurb is absolutely positioned, so
+   without this the body would size to the short label and the blurb would
+   wrap to a sliver. */
+.card-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 4.5rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* With the description hidden, the name carries the card on its own. */
+.card-name {
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  transition: transform 0.24s ease;
+}
+.card:hover .card-name,
+.card:focus-visible .card-name {
+  transform: translateY(-0.62rem);
+}
+
+/* Clamped to two lines: the card is a fixed height, so on narrow viewports a
+   long description would otherwise wrap past the bottom edge and get sliced
+   mid-sentence. Two lines then ellipsis, at any width. */
+.card-blurb {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  margin-top: 0.34rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  color: var(--fog);
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition:
+    opacity 0.24s ease,
+    transform 0.24s ease;
+}
+.card:hover .card-blurb,
+.card:focus-visible .card-blurb {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* No `margin-left: auto` here: an auto margin swallows the row's free space
+   before flex-grow can hand it to .card-body, which squeezed the blurb to a
+   ~92px column. Letting the body grow pushes the arrow to the edge anyway. */
+.card-arrow {
+  flex: none;
+  color: var(--fog);
+  font-size: 1.1rem;
+  transition:
+    transform 0.22s ease,
+    color 0.22s ease;
+}
+
+.card:hover .card-emoji,
+.card:focus-visible .card-emoji {
+  transform: scale(1.06);
+}
+
+.card:hover .card-arrow,
+.card:focus-visible .card-arrow {
+  transform: translateX(4px);
+  color: var(--accent);
+}
+
+/* ---------- glass ---------- */
+
+.glass {
+  position: relative;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.085),
+    rgba(255, 255, 255, 0.028)
+  );
+  /* Needs the aurora behind it to refract — see Atmosphere. */
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+/* Specular highlight sweeping the top-left corner. */
+.glass-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    150deg,
+    rgba(255, 255, 255, 0.17),
+    rgba(255, 255, 255, 0.03) 38%,
+    transparent 62%
+  );
+}
+
+.glass-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.6rem 1.5rem;
+}
+
+/* ---------- section screens ---------- */
+
+.screen {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 3.4rem 1.5rem;
+  min-height: 100%;
+}
+
+.screen-head {
+  display: grid;
+  gap: 0.85rem;
+  justify-items: start;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.95rem;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--fog);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+.back:hover,
+.back:focus-visible {
+  color: var(--text);
+  border-color: var(--line-hi);
+  background: rgba(255, 255, 255, 0.07);
+}
+.back:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
+
+.screen-title {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.screen-emoji {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+.screen-title h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3.6vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.screen-stamp {
+  margin: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fog);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- diet ---------- */
+
+.diet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+.meal-card {
+  grid-column: 1 / -1;
+}
+@media (max-width: 720px) {
+  .diet-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.meal-head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.9rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3em 0.8em;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fog);
+  border: 1px solid var(--line-hi);
+  border-radius: 999px;
+}
+.pill-now {
+  color: #062;
+  background: var(--accent, var(--teal));
+  border-color: transparent;
+  font-weight: 700;
+}
+
+.meal-window {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.78rem;
+  color: var(--fog);
+  font-variant-numeric: tabular-nums;
+}
+
+.meal-name {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.meal-away {
+  margin: 0.3rem 0 1.1rem;
+  font-size: 0.88rem;
+  color: var(--fog);
+}
+
+.meal-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1.3rem;
+  padding: 0;
+  list-style: none;
+}
+.meal-items li {
+  padding: 0.42em 0.85em;
+  font-size: 0.85rem;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.meal-macros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.9rem;
+  margin: auto 0 0;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line);
+}
+.meal-macros div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.meal-macros dt {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+.meal-macros dd {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  margin: 0 0 1.1rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+
+.stat-foot {
+  margin: auto 0 0;
+  padding-top: 1.1rem;
+  font-size: 0.85rem;
+  color: var(--fog);
+  border-top: 1px solid var(--line);
+}
+.stat-foot strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* calorie ring */
+.ring-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 0.4rem;
+  width: 168px;
+  height: 168px;
+}
+.ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.ring-track,
+.ring-fill {
+  fill: none;
+  stroke-width: 11;
+  stroke-linecap: round;
+}
+.ring-track {
+  stroke: rgba(255, 255, 255, 0.08);
+}
+.ring-fill {
+  stroke: var(--accent, var(--teal));
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 55%, transparent));
+}
+.ring-centre {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+.ring-value {
+  font-size: 2.1rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.ring-unit {
+  font-size: 0.78rem;
+  color: var(--fog);
+  font-variant-numeric: tabular-nums;
+}
+
+/* protein / macros */
+.macro-hero {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin: 0 0 1.3rem;
+}
+.macro-value {
+  font-size: 2.6rem;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.macro-unit {
+  font-size: 0.95rem;
+  color: var(--fog);
+  font-variant-numeric: tabular-nums;
+}
+
+.macro-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.macro-row {
+  display: grid;
+  grid-template-columns: 4.2rem 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+.macro-name {
+  font-size: 0.82rem;
+  color: var(--fog);
+}
+.macro-bar {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+.macro-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.macro-num {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.macro-num em {
+  font-style: normal;
+  color: var(--fog);
+}
+
+/* ---------- add food ---------- */
+
+.add-food {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.1rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #052;
+  background: var(--teal);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(84, 240, 208, 0.28);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.add-food:hover,
+.add-food:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 0 32px rgba(84, 240, 208, 0.42);
+}
+.add-food:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: start center;
+  padding: 6vh 1.25rem 2rem;
+  background: rgba(3, 4, 8, 0.55);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: fadeIn 0.18s ease backwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+.sheet {
+  width: min(540px, 100%);
+  animation: sheetIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes sheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.98);
+  }
+}
+
+.sheet-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.1rem 1.1rem 0.95rem;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.sheet-head h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.icon-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--fog);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+.icon-btn:hover,
+.icon-btn:focus-visible {
+  color: var(--text);
+  border-color: var(--line-hi);
+}
+
+.search-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Scan sits beside the search field: it is the same job — identify a product —
+   done with the camera instead of the keyboard. */
+.scan-btn {
+  flex: none;
+  width: 46px;
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
+  color: var(--teal);
+  background: rgba(84, 240, 208, 0.08);
+  border: 1px solid rgba(84, 240, 208, 0.4);
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+.scan-btn:hover,
+.scan-btn:focus-visible {
+  background: rgba(84, 240, 208, 0.16);
+  transform: translateY(-1px);
+}
+.scan-btn:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+/* viewfinder */
+.scan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.scan-view {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 46vh;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+}
+.scan-view video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.scan-frame {
+  position: absolute;
+  inset: 18% 12%;
+  border: 2px solid rgba(84, 240, 208, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.35);
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line-hi);
+  border-radius: 12px;
+}
+.search-input::placeholder {
+  color: var(--fog);
+}
+.search-input:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.sheet-hint {
+  margin: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+
+/* Roughly three rows tall, then scrolls: this panel floats over the page, so
+   it should suggest rather than take the screen over. */
+.hits {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0 0.25rem 0 0;
+  list-style: none;
+  overflow-y: auto;
+  max-height: 208px;
+}
+
+.hit {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.5rem 0.7rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.hit-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.hit-name {
+  font-size: 0.86rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hit-brand {
+  display: none; /* folded into the macro line to keep rows to two lines */
+}
+.hit-name {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.hit-store {
+  flex: none;
+  padding: 0.1em 0.45em;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--teal);
+  border: 1px solid rgba(84, 240, 208, 0.4);
+  border-radius: 5px;
+}
+.hit-macros {
+  font-size: 0.72rem;
+  color: var(--fog);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hit-macros em {
+  font-style: normal;
+  opacity: 0.7;
+}
+
+.hit-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.grams {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--fog);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+.grams input {
+  width: 3.4rem;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.grams input:focus-visible {
+  outline: none;
+}
+
+.add-btn {
+  padding: 0.45rem 0.9rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #052;
+  background: var(--teal);
+  border: 0;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.add-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.ghost-btn {
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--fog);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed var(--line-hi);
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+.ghost-btn:hover,
+.ghost-btn:focus-visible {
+  color: var(--text);
+  border-color: var(--teal);
+}
+.ghost-btn.wide {
+  width: 100%;
+}
+
+/* manual entry */
+.manual {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+  min-width: 0;
+}
+.field > span {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+.field input {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.field input:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+@media (max-width: 560px) {
+  .field-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.manual-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.2rem;
+}
+.add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------- extras ---------- */
+
+.extras-card {
+  grid-column: 1 / -1;
+}
+.extras {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  list-style: none;
+}
+.extra {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0.8rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+}
+.extra-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.extra-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.extra-sub {
+  font-size: 0.75rem;
+  color: var(--fog);
+}
+.extra-macros {
+  flex: none;
+  font-size: 0.82rem;
+  color: var(--fog);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora i,
+  .brand {
+    animation: none;
+  }
+  .sheet,
+  .sheet-backdrop {
+    animation: none;
+  }
+  .ring-fill,
+  .macro-fill {
+    transition: none;
+  }
+  .ctx,
+  .card {
+    animation: none;
+  }
+  .card:hover,
+  .card:focus-visible {
+    transform: none;
+  }
+  .card:hover .card-name,
+  .card:focus-visible .card-name,
+  .card:hover .card-emoji,
+  .card:focus-visible .card-emoji {
+    transform: none;
+  }
+  .card-blurb {
+    transform: none;
+  }
+}
