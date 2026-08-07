@@ -2201,3 +2201,10 @@ canvas {
   border: 0;
   cursor: pointer;
 }
+
+.recipe-scale-note {
+  margin: 0.7rem 0 0;
+  font-size: 0.74rem;
+  color: var(--fog);
+  font-style: italic;
+}

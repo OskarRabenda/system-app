@@ -1,5 +1,10 @@
 import { useEffect } from "react";
-import { mealIcon, type PlannedMeal } from "../plan";
+import {
+  ingredientFactor,
+  mealIcon,
+  scaleIngredient,
+  type PlannedMeal,
+} from "../plan";
 import { formatWindow } from "../data";
 
 type Props = {
@@ -18,6 +23,8 @@ export default function RecipeSheet({ meal, onClose }: Props) {
 
   const r = meal.recipe;
   const hasSteps = !!r?.steps.length;
+  const factor = ingredientFactor(meal);
+  const scaled = factor !== 1;
 
   return (
     <div className="sheet-backdrop" onPointerDown={onClose}>
@@ -95,13 +102,22 @@ export default function RecipeSheet({ meal, onClose }: Props) {
             <section className="recipe-block">
               <h3>
                 Ingredients
-                {r.yield && <span className="recipe-yield">{r.yield}</span>}
+                <span className="recipe-yield">
+                  {meal.servings === 1
+                    ? "for your portion"
+                    : `for your ${meal.servings} portions`}
+                </span>
               </h3>
               <ul className="ingredients">
                 {r.ingredients.map((item, i) => (
-                  <li key={i}>{item}</li>
+                  <li key={i}>{scaleIngredient(item, factor)}</li>
                 ))}
               </ul>
+              {scaled && r.yield && (
+                <p className="recipe-scale-note">
+                  Scaled from the original, which makes {r.yield}.
+                </p>
+              )}
             </section>
           ) : null}
 

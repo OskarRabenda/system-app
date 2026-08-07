@@ -105,6 +105,44 @@ export function mealIcon(meal: PlannedMeal): string {
   return SLOT_ICONS[meal.slot] ?? "🍽️";
 }
 
+/**
+ * How many portions the recipe as written makes. It is not always one — the
+ * pork loin and the beetroot barley both make three, the pastas two — so the
+ * printed amounts are for that many people, not for one sitting.
+ */
+export function yieldPortions(recipe: Recipe | null): number {
+  const n = recipe?.yield?.match(/(\d+(?:[.,]\d+)?)/);
+  const value = n ? Number(n[1].replace(",", ".")) : 1;
+  return value > 0 ? value : 1;
+}
+
+/**
+ * What to multiply the printed ingredients by: the plan says how many portions
+ * are eaten, the recipe says how many it makes.
+ */
+export function ingredientFactor(meal: PlannedMeal): number {
+  return meal.servings / yieldPortions(meal.recipe);
+}
+
+/**
+ * Shoppable amounts. Rounds to the nearest 5 g, except under 10 g where that
+ * would distort a small quantity — 4 g of dill must not become 5 g while 3 g
+ * of it rounds away to nothing.
+ */
+export function roundGrams(grams: number): number {
+  if (grams >= 10) return Math.round(grams / 5) * 5;
+  return Math.max(1, Math.round(grams));
+}
+
+/** "175 g łososia świeżego" scaled and rounded, name left untouched. */
+export function scaleIngredient(text: string, factor: number): string {
+  return text.replace(
+    /^(\d+(?:[.,]\d+)?)\s*g\b/,
+    (_whole, amount: string) =>
+      `${roundGrams(Number(amount.replace(",", ".")) * factor)} g`,
+  );
+}
+
 const DAY_CODES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 /** The plan for a given date, falling back to the first day if unmatched. */
