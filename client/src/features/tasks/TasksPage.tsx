@@ -27,6 +27,7 @@ export default function TasksPage({ onBack }: Props) {
       {
         id: `task-${Date.now()}`,
         title: draft.title,
+        description: draft.description,
         deadline: draft.deadline,
         priority: draft.priority,
         done: false,

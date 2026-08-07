@@ -4,12 +4,31 @@ export type Priority = number;
 export type Task = {
   id: string;
   title: string;
+  /** Free text. Optional — a title is often enough. */
+  description?: string;
   /** ISO date (YYYY-MM-DD). Optional — not every task has a deadline. */
   deadline?: string;
   priority: Priority;
   done: boolean;
   createdAt: string;
 };
+
+/** Local calendar date as YYYY-MM-DD — not toISOString(), which is UTC and
+ *  can land on yesterday for anyone east of Greenwich. */
+export function todayISO(now = new Date()): string {
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+/** Null when acceptable; otherwise the reason it is not. */
+export function validateDeadline(
+  iso: string,
+  now = new Date(),
+): string | null {
+  if (!iso) return null; // a deadline is optional
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "Not a valid date";
+  if (iso < todayISO(now)) return "Deadline cannot be before today";
+  return null;
+}
 
 export type PriorityBand = { label: string; hue: string };
 

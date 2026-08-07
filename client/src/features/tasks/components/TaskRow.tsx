@@ -29,6 +29,9 @@ export default function TaskRow({ task, onToggle, onRemove }: Props) {
 
       <div className="task-main">
         <span className="task-title">{task.title}</span>
+        {task.description && (
+          <span className="task-desc">{task.description}</span>
+        )}
         <span className="task-meta">
           <span className="task-priority" title={`${band.label} priority`}>
             {formatPriority(task.priority)}

@@ -13,7 +13,7 @@ export default function SupplementsCard({ taken, onToggle }: Props) {
 
   return (
     <GlassCard className="supp-card" accent="#c9a7ff">
-      <p className="stat-label">Supplements</p>
+      <p className="stat-label">Daily checklist</p>
 
       <ul className="supps">
         {SUPPLEMENTS.map((s) => {

@@ -199,10 +199,18 @@ export function saveExtras(day: Date, extras: ExtraItem[]): void {
 
 export type Supplement = { id: string; name: string; detail: string };
 
+/**
+ * Order matters: the first three lay out as a row, and the last two sit
+ * beneath, each straddling a gap in the row above (see `.supps` in the
+ * stylesheet). Timing notes are general guidance for the vitamins; the
+ * prescribed items just say so rather than inventing instructions.
+ */
 export const SUPPLEMENTS: Supplement[] = [
   { id: "vitamin-d", name: "Vitamin D", detail: "with a meal containing fat" },
   { id: "vitamin-c", name: "Vitamin C", detail: "any time of day" },
   { id: "vitamin-b12", name: "Vitamin B12", detail: "best on an empty stomach" },
+  { id: "lotemax", name: "LoteMax", detail: "as prescribed" },
+  { id: "epicare", name: "Epicare", detail: "as prescribed" },
 ];
 
 const suppKey = (d: Date) => `system.diet.supplements.${dayStamp(d)}`;

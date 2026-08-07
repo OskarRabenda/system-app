@@ -1,9 +1,16 @@
 import { useState, type FormEvent } from "react";
 import GlassCard from "../../../components/ui/GlassCard";
-import { bandOf, parsePriority, type Priority } from "../data";
+import {
+  bandOf,
+  parsePriority,
+  todayISO,
+  validateDeadline,
+  type Priority,
+} from "../data";
 
 export type NewTask = {
   title: string;
+  description?: string;
   deadline?: string;
   priority: Priority;
 };
@@ -15,6 +22,7 @@ type Props = {
 
 export default function TaskForm({ onSubmit, onCancel }: Props) {
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState("");
   const [priority, setPriority] = useState("");
 
@@ -25,14 +33,17 @@ export default function TaskForm({ onSubmit, onCancel }: Props) {
   // NOT mid-typing — it is a complete entry, and an invalid one.
   const midType = text === "-" || /^-?\d*\.$/.test(text);
   const showError = text !== "" && !midType && !parsed.ok;
-  const canSave = title.trim().length > 0 && parsed.ok;
   const band = parsed.ok ? bandOf(parsed.value) : null;
+
+  const deadlineError = validateDeadline(deadline);
+  const canSave = title.trim().length > 0 && parsed.ok && !deadlineError;
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!canSave || !parsed.ok) return;
     onSubmit({
       title: title.trim(),
+      description: description.trim() || undefined,
       deadline: deadline || undefined,
       priority: parsed.value,
     });
@@ -51,14 +62,37 @@ export default function TaskForm({ onSubmit, onCancel }: Props) {
           />
         </label>
 
+        <label className="field">
+          <span>Description</span>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Any detail worth remembering (optional)"
+            rows={2}
+          />
+        </label>
+
         <div className="task-form-row">
           <label className="field">
             <span>Deadline</span>
             <input
               type="date"
+              className={deadlineError ? "is-invalid" : ""}
               value={deadline}
+              // Blocks past dates in the picker itself; validateDeadline still
+              // runs, since the field can be typed into directly.
+              min={todayISO()}
               onChange={(e) => setDeadline(e.target.value)}
+              aria-invalid={!!deadlineError}
+              aria-describedby="deadline-note"
             />
+            <span
+              id="deadline-note"
+              className={`field-note ${deadlineError ? "is-error" : ""}`}
+              role={deadlineError ? "alert" : undefined}
+            >
+              {deadlineError ?? "Today or later (optional)"}
+            </span>
           </label>
 
           <label className="field">
