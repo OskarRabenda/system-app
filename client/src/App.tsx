@@ -8,7 +8,7 @@ import type { SectionId } from "./features/dashboard/sections";
 
 type Screen = "hero" | "dashboard" | "diet" | "tasks";
 
-const BEAT = 500; // pause after the wordmark settles, before the first reveal
+const BEAT = 260; // pause after the S lands, before the reveal takes over
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("hero");
