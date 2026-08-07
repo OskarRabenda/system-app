@@ -6,7 +6,8 @@ import ExtrasCard from "./components/ExtrasCard";
 import SupplementsCard from "./components/SupplementsCard";
 import AddFoodPanel from "./components/AddFoodPanel";
 import PlanCalendar from "./components/PlanCalendar";
-import { dayFor } from "./plan";
+import RecipeSheet from "./components/RecipeSheet";
+import { dayFor, type PlannedMeal } from "./plan";
 import Atmosphere from "../../components/Atmosphere";
 import {
   addMacros,
@@ -34,6 +35,7 @@ export default function DietPage({ onBack }: Props) {
   const [taken, setTaken] = useState<string[]>(() => loadSupplements(new Date()));
   const [adding, setAdding] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
+  const [recipeOf, setRecipeOf] = useState<PlannedMeal | null>(null);
 
   // Which meal is current depends on the clock, so keep it honest.
   useEffect(() => {
@@ -135,7 +137,12 @@ export default function DietPage({ onBack }: Props) {
       </header>
 
       <div className="diet-grid">
-        <NextMealCard current={current} />
+        <NextMealCard
+          current={current}
+          onOpenRecipe={() =>
+            current.meal.planned && setRecipeOf(current.meal.planned)
+          }
+        />
         <CalorieTracker
           consumed={consumed.calories}
           target={DAILY_TARGET.calories}
@@ -163,7 +170,12 @@ export default function DietPage({ onBack }: Props) {
         <PlanCalendar
           initialDay={dayFor(now).code}
           onClose={() => setPlanOpen(false)}
+          onOpenRecipe={(meal) => setRecipeOf(meal)}
         />
+      )}
+
+      {recipeOf && (
+        <RecipeSheet meal={recipeOf} onClose={() => setRecipeOf(null)} />
       )}
 
       {adding && (

@@ -20,6 +20,21 @@ export type PlannedMeal = {
   link: string | null;
   /** Hero photo from the recipe page, resolved when the plan was generated. */
   image: string | null;
+  recipe: Recipe | null;
+};
+
+/**
+ * Read from the recipe page's structured data, verbatim — so the wording is
+ * the original Polish. Meals with no recipe page (overnight oats, the evening
+ * snacks) carry only the ingredients the plan itself lists, and no steps.
+ */
+export type Recipe = {
+  name: string | null;
+  yield: string | null;
+  prepMin: number | null;
+  totalMin: number | null;
+  ingredients: string[];
+  steps: string[];
 };
 
 export type PlanDay = {

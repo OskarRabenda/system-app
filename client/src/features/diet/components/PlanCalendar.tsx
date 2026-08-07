@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react";
-import { mealIcon, PLAN } from "../plan";
+import { mealIcon, PLAN, type PlannedMeal } from "../plan";
 import { formatWindow } from "../data";
 
 type Props = {
   /** Day code to open on, e.g. "Wed". */
   initialDay: string;
   onClose: () => void;
+  onOpenRecipe: (meal: PlannedMeal) => void;
 };
 
-export default function PlanCalendar({ initialDay, onClose }: Props) {
+export default function PlanCalendar({
+  initialDay,
+  onClose,
+  onOpenRecipe,
+}: Props) {
   const [active, setActive] = useState(initialDay);
 
   useEffect(() => {
@@ -63,7 +68,20 @@ export default function PlanCalendar({ initialDay, onClose }: Props) {
 
           <ul className="plan-meals">
             {day.meals.map((m, i) => (
-              <li key={`${m.slot}-${i}`} className="plan-meal">
+              <li
+                key={`${m.slot}-${i}`}
+                className="plan-meal is-clickable"
+                role="button"
+                tabIndex={0}
+                aria-label={`Recipe for ${m.en || m.pl}`}
+                onClick={() => onOpenRecipe(m)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onOpenRecipe(m);
+                  }
+                }}
+              >
                 <div className="plan-when">
                   <span className="plan-slot">{m.slot}</span>
                   <span className="plan-time">
@@ -107,11 +125,14 @@ export default function PlanCalendar({ initialDay, onClose }: Props) {
                     href={m.link}
                     target="_blank"
                     rel="noopener noreferrer"
+                    // The row itself opens the recipe in-app; this goes to the
+                    // source, so it must not trigger both.
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    Recipe <span aria-hidden="true">↗</span>
+                    Source <span aria-hidden="true">↗</span>
                   </a>
                 ) : (
-                  <span className="no-recipe">no recipe</span>
+                  <span className="no-recipe">no source</span>
                 )}
               </li>
             ))}

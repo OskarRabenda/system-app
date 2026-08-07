@@ -2,7 +2,13 @@ import GlassCard from "../../../components/ui/GlassCard";
 import { formatAway, formatWindow, type CurrentMeal } from "../data";
 import { mealIcon } from "../plan";
 
-export default function NextMealCard({ current }: { current: CurrentMeal }) {
+export default function NextMealCard({
+  current,
+  onOpenRecipe,
+}: {
+  current: CurrentMeal;
+  onOpenRecipe?: () => void;
+}) {
   const { meal, status, minutesAway } = current;
   const eatingNow = status === "now";
   const plan = meal.planned;
@@ -30,15 +36,10 @@ export default function NextMealCard({ current }: { current: CurrentMeal }) {
         {plan && plan.servings !== 1 ? ` · ${plan.servings} servings` : ""}
       </p>
 
-      {plan?.link && (
-        <a
-          className="recipe-btn"
-          href={plan.link}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Recipe <span aria-hidden="true">↗</span>
-        </a>
+      {plan && (
+        <button type="button" className="recipe-btn" onClick={onOpenRecipe}>
+          {plan.recipe?.steps.length ? "Recipe" : "What's in it"}
+        </button>
       )}
 
         </div>

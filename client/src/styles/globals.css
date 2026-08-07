@@ -2015,3 +2015,189 @@ canvas {
     font-size: 0.72rem;
   }
 }
+
+/* ---------- recipe detail ---------- */
+
+.plan-meal.is-clickable {
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+.plan-meal.is-clickable:hover,
+.plan-meal.is-clickable:focus-visible {
+  border-color: var(--line-hi);
+  background: rgba(255, 255, 255, 0.06);
+}
+.plan-meal.is-clickable:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.recipe-sheet {
+  width: min(680px, 100%);
+}
+.recipe-sheet .sheet-body {
+  max-height: 86vh;
+  overflow-y: auto;
+  gap: 1.1rem;
+}
+
+.recipe-heading h2 {
+  margin: 0.25rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.recipe-original {
+  margin: 0.2rem 0 0;
+  font-size: 0.84rem;
+  color: var(--fog);
+}
+
+.recipe-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+}
+.recipe-photo {
+  flex: none;
+  width: 168px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 13px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+.recipe-photo.is-icon {
+  display: grid;
+  place-items: center;
+  font-size: 3rem;
+  background: rgba(88, 214, 141, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(88, 214, 141, 0.28);
+}
+
+.recipe-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem 1.5rem;
+  margin: 0;
+  align-content: flex-start;
+}
+.recipe-facts div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.recipe-facts dt {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+.recipe-facts dd {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.recipe-block h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 0.6rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+.recipe-yield {
+  font-family: inherit;
+  letter-spacing: 0.1em;
+  color: var(--fog);
+  text-transform: none;
+}
+
+.ingredients {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ingredients li {
+  position: relative;
+  padding-left: 0.9rem;
+  font-size: 0.87rem;
+  line-height: 1.4;
+}
+.ingredients li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--teal);
+  opacity: 0.75;
+}
+@media (max-width: 560px) {
+  .ingredients {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .recipe-top {
+    flex-direction: column;
+  }
+  .recipe-photo {
+    width: 100%;
+  }
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+.steps li {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+.step-no {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-top: 0.1rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #052;
+  background: var(--teal);
+  border-radius: 7px;
+}
+.step-text {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+/* The card's recipe control is a button now, not a link. */
+.meal-card .recipe-btn {
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 0;
+  cursor: pointer;
+}

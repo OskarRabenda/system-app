@@ -30,6 +30,7 @@ const TEMPLATE = [
     sodium: 200,
     link: null,
     image: null,
+    recipe: null,
   },
   {
     slot: "Lunch",
@@ -45,6 +46,7 @@ const TEMPLATE = [
     sodium: 600,
     link: null,
     image: null,
+    recipe: null,
   },
   {
     slot: "Afternoon",
@@ -60,6 +62,7 @@ const TEMPLATE = [
     sodium: 120,
     link: null,
     image: null,
+    recipe: null,
   },
   {
     slot: "Dinner",
@@ -75,6 +78,7 @@ const TEMPLATE = [
     sodium: 400,
     link: null,
     image: null,
+    recipe: null,
   },
   {
     slot: "Evening snack",
@@ -90,6 +94,7 @@ const TEMPLATE = [
     sodium: 40,
     link: null,
     image: null,
+    recipe: null,
   },
 ];
 
