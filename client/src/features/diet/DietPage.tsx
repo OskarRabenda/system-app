@@ -5,6 +5,8 @@ import MacroBreakdown from "./components/MacroBreakdown";
 import ExtrasCard from "./components/ExtrasCard";
 import SupplementsCard from "./components/SupplementsCard";
 import AddFoodPanel from "./components/AddFoodPanel";
+import PlanCalendar from "./components/PlanCalendar";
+import { dayFor } from "./plan";
 import Atmosphere from "../../components/Atmosphere";
 import {
   addMacros,
@@ -31,6 +33,7 @@ export default function DietPage({ onBack }: Props) {
   const [extras, setExtras] = useState<ExtraItem[]>(() => loadExtras(new Date()));
   const [taken, setTaken] = useState<string[]>(() => loadSupplements(new Date()));
   const [adding, setAdding] = useState(false);
+  const [planOpen, setPlanOpen] = useState(false);
 
   // Which meal is current depends on the clock, so keep it honest.
   useEffect(() => {
@@ -118,6 +121,15 @@ export default function DietPage({ onBack }: Props) {
           >
             <span aria-hidden="true">＋</span> Add food
           </button>
+          <button
+            type="button"
+            className="plan-btn"
+            onClick={() => setPlanOpen(true)}
+            title="See the whole week"
+            aria-label="See the whole week"
+          >
+            <span aria-hidden="true">🗓</span>
+          </button>
         </div>
         <p className="screen-stamp">{stamp}</p>
       </header>
@@ -146,6 +158,13 @@ export default function DietPage({ onBack }: Props) {
           />
         )}
       </div>
+
+      {planOpen && (
+        <PlanCalendar
+          initialDay={dayFor(now).code}
+          onClose={() => setPlanOpen(false)}
+        />
+      )}
 
       {adding && (
         <AddFoodPanel

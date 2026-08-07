@@ -1224,6 +1224,249 @@ canvas {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- weekly plan ---------- */
+
+.plan-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  font-size: 1.15rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line-hi);
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease,
+    border-color 0.18s ease;
+}
+.plan-btn:hover,
+.plan-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: var(--teal);
+  transform: translateY(-1px);
+}
+.plan-btn:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.plan-sheet {
+  width: min(760px, 100%);
+}
+.plan-sheet .sheet-body {
+  max-height: 84vh;
+  overflow-y: auto;
+}
+.plan-summary {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--fog);
+}
+
+.day-tabs {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.day-tab {
+  flex: 1 1 auto;
+  padding: 0.5rem 0.4rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--fog);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+.day-tab:hover {
+  color: var(--text);
+  border-color: var(--line-hi);
+}
+.day-tab.is-on {
+  color: #052;
+  background: var(--teal);
+  border-color: transparent;
+}
+.day-tab:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.plan-meals {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.plan-meal {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.7rem 0.85rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+}
+@media (max-width: 640px) {
+  .plan-meal {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .plan-when {
+    grid-column: 1 / -1;
+  }
+}
+
+.plan-when {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.plan-slot {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.plan-time {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.7rem;
+  color: var(--fog);
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-what {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+.plan-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.plan-original {
+  font-size: 0.74rem;
+  color: var(--fog);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.plan-macros {
+  font-size: 0.73rem;
+  color: var(--fog);
+  font-variant-numeric: tabular-nums;
+}
+
+.recipe-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #052;
+  background: var(--teal);
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.recipe-btn:hover,
+.recipe-btn:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 0 22px rgba(84, 240, 208, 0.35);
+}
+.recipe-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.recipe-btn.small {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.75rem;
+}
+.no-recipe {
+  font-size: 0.72rem;
+  color: var(--fog);
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+.plan-totals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.82rem;
+  color: var(--fog);
+}
+.plan-totals-label {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.plan-totals-values strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-targets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4rem;
+  margin: 0;
+  padding: 0.85rem 0 0;
+  border-top: 1px solid var(--line);
+}
+.plan-targets div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.plan-targets dt {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+.plan-targets dd {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* meal card additions */
+.meal-note {
+  font-size: 0.74rem;
+  color: var(--fog);
+}
+.meal-original {
+  margin: 0.2rem 0 0;
+  font-size: 0.85rem;
+  color: var(--fog);
+}
+.meal-card .recipe-btn {
+  align-self: flex-start;
+  margin: 0 0 1.2rem;
+}
+
 /* ---------- supplements ---------- */
 
 .supp-card {

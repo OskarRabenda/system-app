@@ -75,3 +75,6 @@ desktop.ini
 # skills-lock.json records installed skills so they can be restored.
 .claude/settings.local.json
 .claude/skills/
+
+# Personal plan data transcribed from the spreadsheet
+*.local.ts

@@ -1,10 +1,9 @@
 /**
- * Placeholder diet plan.
- *
- * This is the seam for the real data: when the spreadsheet arrives, only
- * `MEALS` and `DAILY_TARGET` need to come from the API instead of this file.
- * Everything below is pure logic over that shape, so the UI will not change.
+ * Diet logic. The plan itself lives in `plan.ts`, which loads the real
+ * spreadsheet-derived week when present and an example otherwise; everything
+ * here is pure logic over that shape.
  */
+import { dayFor, PLAN, type PlannedMeal } from "./plan";
 
 export type Macros = {
   calories: number;
@@ -21,51 +20,24 @@ export type Meal = {
   endMin: number;
   items: string[];
   macros: Macros;
+  /** The underlying plan entry — recipe name, link, prep time. */
+  planned?: PlannedMeal;
 };
 
-const at = (h: number, m = 0) => h * 60 + m;
+export const DAILY_TARGET: Macros = PLAN.target;
 
-export const DAILY_TARGET: Macros = {
-  calories: 2400,
-  protein: 165,
-  carbs: 250,
-  fat: 75,
-};
-
-export const MEALS: Meal[] = [
-  {
-    id: "breakfast",
-    name: "Breakfast",
-    startMin: at(7),
-    endMin: at(9, 30),
-    items: ["Oats with berries", "Greek yoghurt", "Black coffee"],
-    macros: { calories: 520, protein: 34, carbs: 68, fat: 12 },
-  },
-  {
-    id: "lunch",
-    name: "Lunch",
-    startMin: at(12),
-    endMin: at(14),
-    items: ["Chicken and rice bowl", "Mixed greens", "Olive oil"],
-    macros: { calories: 760, protein: 52, carbs: 82, fat: 22 },
-  },
-  {
-    id: "snack",
-    name: "Afternoon snack",
-    startMin: at(16),
-    endMin: at(17, 30),
-    items: ["Whey shake", "Banana", "Almonds"],
-    macros: { calories: 380, protein: 33, carbs: 40, fat: 11 },
-  },
-  {
-    id: "dinner",
-    name: "Dinner",
-    startMin: at(19),
-    endMin: at(21),
-    items: ["Salmon fillet", "Sweet potato", "Broccoli"],
-    macros: { calories: 740, protein: 46, carbs: 60, fat: 30 },
-  },
-];
+/** Today's meals, taken from the weekly plan. */
+export function mealsFor(date: Date): Meal[] {
+  return dayFor(date).meals.map((m, i) => ({
+    id: `${m.slot}-${i}`.toLowerCase().replace(/\s+/g, "-"),
+    name: m.slot,
+    startMin: m.startMin,
+    endMin: m.endMin,
+    items: [m.en || m.pl],
+    macros: m.macros,
+    planned: m,
+  }));
+}
 
 export type MealStatus = "now" | "next" | "done";
 
@@ -84,6 +56,7 @@ const minutesOf = (d: Date) => d.getHours() * 60 + d.getMinutes();
  */
 export function currentMeal(now: Date): CurrentMeal {
   const mins = minutesOf(now);
+  const MEALS = mealsFor(now);
 
   const active = MEALS.find((m) => mins >= m.startMin && mins < m.endMin);
   if (active) {
@@ -111,6 +84,7 @@ export function currentMeal(now: Date): CurrentMeal {
 /** Everything whose window has closed counts as eaten. */
 export function consumedSoFar(now: Date): Macros {
   const mins = minutesOf(now);
+  const MEALS = mealsFor(now);
   return MEALS.filter((m) => m.endMin <= mins).reduce<Macros>(
     (sum, m) => ({
       calories: sum.calories + m.macros.calories,
@@ -233,10 +207,14 @@ export function saveSupplements(day: Date, taken: string[]): void {
   }
 }
 
-export function formatWindow(meal: Meal): string {
+/** Takes the times rather than a whole Meal, so plan entries can use it too. */
+export function formatWindow(window: {
+  startMin: number;
+  endMin: number;
+}): string {
   const fmt = (mins: number) =>
     `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
-  return `${fmt(meal.startMin)} – ${fmt(meal.endMin)}`;
+  return `${fmt(window.startMin)} – ${fmt(window.endMin)}`;
 }
 
 export function formatAway(minutes: number): string {
