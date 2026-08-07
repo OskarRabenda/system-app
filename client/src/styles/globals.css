@@ -1217,9 +1217,217 @@ canvas {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- tasks ---------- */
+
+.task-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.1rem;
+}
+.task-stack > .glass,
+.task-stack > .task-form-card {
+  width: 100%;
+}
+
+/* Quiet by design: an empty list should read as calm, not broken. */
+.empty-note {
+  margin: 0.4rem 0;
+  font-size: 1rem;
+  color: var(--text);
+  opacity: 0.45;
+}
+
+.add-task {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.3rem;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #052;
+  background: var(--teal);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(84, 240, 208, 0.25);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.add-task:hover,
+.add-task:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 0 32px rgba(84, 240, 208, 0.4);
+}
+.add-task:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.task-form-card {
+  animation: cardIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.task-form-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 0.9rem;
+  align-items: start;
+}
+@media (max-width: 620px) {
+  .task-form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.priority-field {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.priority-field legend {
+  padding: 0 0 0.32rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+.priority-picker {
+  display: flex;
+  gap: 0.45rem;
+}
+.priority-chip {
+  flex: 1 1 0;
+  padding: 0.62rem 0.5rem;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--fog);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+.priority-chip:hover {
+  border-color: var(--line-hi);
+  color: var(--text);
+}
+.priority-chip.is-on {
+  color: var(--hue);
+  border-color: color-mix(in srgb, var(--hue) 60%, transparent);
+  background: color-mix(in srgb, var(--hue) 12%, transparent);
+}
+.priority-chip:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0.85rem 0.7rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+}
+/* Priority reads as a stripe as well as a word, so urgency scans at a glance. */
+.task::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55rem;
+  bottom: 0.55rem;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent);
+}
+.task.is-done {
+  opacity: 0.5;
+}
+.task.is-done .task-title {
+  text-decoration: line-through;
+}
+
+.task-check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  font-size: 0.75rem;
+  color: #052;
+  background: transparent;
+  border: 1px solid var(--line-hi);
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+.task-check[aria-checked="true"] {
+  background: var(--teal);
+  border-color: transparent;
+}
+.task-check:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.task-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.task-title {
+  font-size: 0.94rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.task-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.76rem;
+  color: var(--fog);
+}
+.task-priority {
+  color: var(--accent);
+}
+.task-due.is-soon {
+  color: #f5c15c;
+}
+.task-due.is-overdue {
+  color: #ff8b6b;
+  font-weight: 600;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .aurora i,
   .brand {
+    animation: none;
+  }
+  .task-form-card {
     animation: none;
   }
   .sheet,

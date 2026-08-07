@@ -3,9 +3,10 @@ import HomePage, { HERO_SETTLED } from "./pages/HomePage";
 import WaveReveal, { type Origin } from "./components/WaveReveal";
 import DashboardPage from "./features/dashboard/DashboardPage";
 import DietPage from "./features/diet/DietPage";
+import TasksPage from "./features/tasks/TasksPage";
 import type { SectionId } from "./features/dashboard/sections";
 
-type Screen = "hero" | "dashboard" | "diet";
+type Screen = "hero" | "dashboard" | "diet" | "tasks";
 
 const BEAT = 500; // pause after the wordmark settles, before the first reveal
 
@@ -46,11 +47,11 @@ export default function App() {
   };
 
   const handleSelect = (id: SectionId, from: Origin) => {
-    if (id === "diet") {
-      go("diet", from);
+    if (id === "diet" || id === "tasks") {
+      go(id, from);
       return;
     }
-    // Other sections have no screen yet.
+    // Sleep and workouts have no screen yet.
     console.log(`[system] section selected: ${id}`);
   };
 
@@ -58,6 +59,8 @@ export default function App() {
     if (which === "hero") return <HomePage />;
     if (which === "diet")
       return <DietPage onBack={(from) => go("dashboard", from)} />;
+    if (which === "tasks")
+      return <TasksPage onBack={(from) => go("dashboard", from)} />;
     return (
       <DashboardPage
         onSelect={handleSelect}
