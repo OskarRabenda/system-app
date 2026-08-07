@@ -71,6 +71,18 @@ export default function PlanCalendar({ initialDay, onClose }: Props) {
                   </span>
                 </div>
 
+                {m.image ? (
+                  <img
+                    className="plan-thumb"
+                    src={m.image}
+                    alt=""
+                    loading="lazy"
+                    onError={(e) => e.currentTarget.remove()}
+                  />
+                ) : (
+                  <span className="plan-thumb is-empty" aria-hidden="true" />
+                )}
+
                 <div className="plan-what">
                   <span className="plan-title">{m.en || m.pl}</span>
                   {m.pl && m.en && <span className="plan-original">{m.pl}</span>}

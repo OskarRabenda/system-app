@@ -18,6 +18,8 @@ export type PlannedMeal = {
   fiber: number;
   sodium: number;
   link: string | null;
+  /** Hero photo from the recipe page, resolved when the plan was generated. */
+  image: string | null;
 };
 
 export type PlanDay = {

@@ -29,6 +29,7 @@ const TEMPLATE = [
     fiber: 10,
     sodium: 200,
     link: null,
+    image: null,
   },
   {
     slot: "Lunch",
@@ -43,6 +44,7 @@ const TEMPLATE = [
     fiber: 12,
     sodium: 600,
     link: null,
+    image: null,
   },
   {
     slot: "Afternoon",
@@ -57,6 +59,7 @@ const TEMPLATE = [
     fiber: 6,
     sodium: 120,
     link: null,
+    image: null,
   },
   {
     slot: "Dinner",
@@ -71,6 +74,7 @@ const TEMPLATE = [
     fiber: 7,
     sodium: 400,
     link: null,
+    image: null,
   },
   {
     slot: "Evening snack",
@@ -85,6 +89,7 @@ const TEMPLATE = [
     fiber: 8,
     sodium: 40,
     link: null,
+    image: null,
   },
 ];
 

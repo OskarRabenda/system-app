@@ -8,6 +8,8 @@ export default function NextMealCard({ current }: { current: CurrentMeal }) {
 
   return (
     <GlassCard className="meal-card" accent="#58d68d">
+      <div className="meal-layout">
+        <div className="meal-text">
       <div className="meal-head">
         <span className={`pill ${eatingNow ? "pill-now" : ""}`}>
           {eatingNow ? "Eating now" : "Up next"}
@@ -37,6 +39,23 @@ export default function NextMealCard({ current }: { current: CurrentMeal }) {
           Recipe <span aria-hidden="true">↗</span>
         </a>
       )}
+
+        </div>
+
+        {plan?.image && (
+          <figure className="meal-photo">
+            <img
+              src={plan.image}
+              alt={plan.en || plan.pl}
+              loading="lazy"
+              // A moved or renamed upstream photo should leave no broken icon.
+              onError={(e) => {
+                e.currentTarget.closest("figure")?.remove();
+              }}
+            />
+          </figure>
+        )}
+      </div>
 
       <dl className="meal-macros">
         <div>
