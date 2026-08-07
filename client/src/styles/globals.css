@@ -2208,3 +2208,17 @@ canvas {
   color: var(--fog);
   font-style: italic;
 }
+
+.recipe-omit-note {
+  margin: 0.7rem 0 0;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--text);
+  background: rgba(245, 193, 92, 0.08);
+  border: 1px solid rgba(245, 193, 92, 0.3);
+  border-radius: 9px;
+}
+.recipe-omit-note strong {
+  color: #f5c15c;
+}

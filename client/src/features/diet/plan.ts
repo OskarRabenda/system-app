@@ -34,6 +34,13 @@ export type Recipe = {
   prepMin: number | null;
   totalMin: number | null;
   ingredients: string[];
+  /**
+   * Ingredients the plan deliberately leaves out — the oatmeal is taken
+   * "no protein powder", which is why its macros are 78 kcal and 16 g of
+   * protein below the published recipe. Listed so the method, which still
+   * mentions them, is not confusing.
+   */
+  omitted: string[];
   steps: string[];
 };
 

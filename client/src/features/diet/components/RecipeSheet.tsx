@@ -113,6 +113,18 @@ export default function RecipeSheet({ meal, onClose }: Props) {
                   <li key={i}>{scaleIngredient(item, factor)}</li>
                 ))}
               </ul>
+              {r.omitted.length > 0 && (
+                <p className="recipe-omit-note">
+                  Your plan leaves out{" "}
+                  <strong>
+                    {r.omitted
+                      .map((item) => scaleIngredient(item, factor))
+                      .join(", ")}
+                  </strong>{" "}
+                  — skip it where the method mentions it. That is why the macros
+                  here are below the published recipe.
+                </p>
+              )}
               {scaled && r.yield && (
                 <p className="recipe-scale-note">
                   Scaled from the original, which makes {r.yield}.
