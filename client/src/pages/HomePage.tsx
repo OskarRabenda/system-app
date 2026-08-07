@@ -5,21 +5,45 @@ import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 
 const FONT = "/fonts/helvetiker_bold.typeface.json";
-const SIZE = 2.6;
-const DEPTH = 0.9; // extrusion depth
+const SIZE = 1.8;
+const DEPTH = 0.62; // extrusion depth
 
 const APPEAR = 0.4; // scales up into view
 const HOLD = 0.55; // stands still, letting it register
-const JUMP = 0.95; // airborne, carrying one full turn
-const LIFT = 1.15; // peak height in world units
+const JUMP = 0.95; // airborne
+const SPIN = 1.3; // the turn keeps ringing briefly after landing
+const LIFT = 1.0; // peak height in world units
 
-/** Second at which the S has landed — drives the app's phase timing. */
-export const HERO_SETTLED = HOLD + JUMP + 0.2;
+/* Overshoot, as in the curve editor: the turn accelerates hard, sails past a
+   full rotation, then rocks back in shrinking swings. */
+/* Frequency is lower than the 3 in the curve editor because that panel counts
+   oscillations over its own timebase. At 3 the whole turn is over in ~140ms,
+   too fast to read as a spin; 1.4 completes it in ~300ms and peaks near the
+   top of the jump, then rocks to a stop as the S lands. */
+const FREQUENCY = 1.4;
+const AMPLITUDE = 0.2; // 20% past the target on the first swing
+
+// Damping ratio that yields exactly AMPLITUDE of overshoot.
+const ZETA = (() => {
+  const l = Math.log(AMPLITUDE);
+  return -l / Math.sqrt(Math.PI * Math.PI + l * l);
+})();
+
+/** Step response of a damped oscillator: 0 at rest, settling on 1. */
+function overshoot(t: number): number {
+  if (t <= 0) return 0;
+  if (t >= 1) return 1;
+  const root = Math.sqrt(1 - ZETA * ZETA);
+  const wd = FREQUENCY * 2 * Math.PI; // damped frequency over the unit move
+  const wn = wd / root;
+  return 1 - (Math.exp(-ZETA * wn * t) / root) * Math.sin(wd * t + Math.acos(ZETA));
+}
+
+/** Second at which the S has landed and stopped ringing. */
+export const HERO_SETTLED = HOLD + SPIN + 0.15;
 
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
 const eOut = (t: number) => 1 - Math.pow(1 - t, 3);
-const eInOut = (t: number) =>
-  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
 function Letter() {
   const mesh = useRef<THREE.Mesh>(null!);
@@ -50,10 +74,11 @@ function Letter() {
     const since = t - HOLD;
     let height = 0;
     if (since > 0) {
-      const p = clamp(since / JUMP, 0, 1);
-      // One arc up and down, with a full turn spread across it.
-      height = Math.sin(Math.PI * p) * LIFT;
-      mesh.current.rotation.y = eInOut(p) * Math.PI * 2;
+      // The jump is a plain arc — gravity does not overshoot the floor.
+      height = Math.sin(Math.PI * clamp(since / JUMP, 0, 1)) * LIFT;
+      // The turn does, settling a little after the landing.
+      mesh.current.rotation.y =
+        overshoot(clamp(since / SPIN, 0, 1)) * Math.PI * 2;
     }
     mesh.current.position.y = height;
 
