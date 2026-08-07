@@ -1,4 +1,5 @@
-export type Priority = "low" | "medium" | "high";
+/** Weight in the half-open range (0, 1] — 1 is the most urgent. */
+export type Priority = number;
 
 export type Task = {
   id: string;
@@ -10,21 +11,63 @@ export type Task = {
   createdAt: string;
 };
 
-export const PRIORITIES: { id: Priority; label: string; hue: string }[] = [
-  { id: "low", label: "Low", hue: "#7fd3ff" },
-  { id: "medium", label: "Medium", hue: "#f5c15c" },
-  { id: "high", label: "High", hue: "#ff8b6b" },
-];
+export type PriorityBand = { label: string; hue: string };
 
-export const priorityOf = (id: Priority) =>
-  PRIORITIES.find((p) => p.id === id) ?? PRIORITIES[1];
+/** Bands only drive colour and a scannable word; the stored value is the number. */
+export function bandOf(priority: Priority): PriorityBand {
+  if (priority >= 0.67) return { label: "High", hue: "#ff8b6b" };
+  if (priority >= 0.34) return { label: "Medium", hue: "#f5c15c" };
+  return { label: "Low", hue: "#7fd3ff" };
+}
+
+/** 0.9 -> "0.9", 0.75 -> "0.75", 1 -> "1" */
+export const formatPriority = (p: Priority) =>
+  String(Math.round(p * 100) / 100);
+
+export type ParseResult =
+  | { ok: true; value: Priority }
+  | { ok: false; error: string };
+
+/**
+ * Parses the priority field. Kept here rather than in the form so the rule has
+ * one home — the range is half-open, so 0 is rejected but 1 is allowed.
+ */
+export function parsePriority(raw: string): ParseResult {
+  const text = raw.trim().replace(",", "."); // comma decimals are normal here
+  if (text === "") return { ok: false, error: "Enter a priority" };
+
+  // Number() would accept "0x1", "1e-3" and whitespace-only strings. The
+  // leading minus is allowed through so a negative reads as out-of-range
+  // rather than as gibberish — it is a number, just the wrong one.
+  if (!/^-?\d*\.?\d+$/.test(text))
+    return { ok: false, error: "Not a number" };
+
+  const value = Number(text);
+  if (!Number.isFinite(value)) return { ok: false, error: "Not a number" };
+  if (value <= 0 || value > 1)
+    return { ok: false, error: "Priority must be in the range (0, 1]" };
+
+  return { ok: true, value };
+}
+
+/** Weights for tasks saved before priority became numeric. */
+const LEGACY: Record<string, number> = { low: 0.25, medium: 0.6, high: 0.9 };
 
 const STORE_KEY = "system.tasks";
 
 export function loadTasks(): Task[] {
   try {
     const raw = localStorage.getItem(STORE_KEY);
-    return raw ? (JSON.parse(raw) as Task[]) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as Task[];
+    // Migrate "low"/"medium"/"high" from before priority was a number.
+    return parsed.map((t) => ({
+      ...t,
+      priority:
+        typeof t.priority === "number"
+          ? t.priority
+          : (LEGACY[String(t.priority)] ?? 0.6),
+    }));
   } catch {
     return [];
   }
@@ -38,13 +81,11 @@ export function saveTasks(tasks: Task[]): void {
   }
 }
 
-const RANK: Record<Priority, number> = { high: 0, medium: 1, low: 2 };
-
 /** Open tasks first, then most urgent, then by deadline, then newest. */
 export function sortTasks(tasks: Task[]): Task[] {
   return [...tasks].sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
-    if (a.priority !== b.priority) return RANK[a.priority] - RANK[b.priority];
+    if (a.priority !== b.priority) return b.priority - a.priority;
     if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
     if (a.deadline) return -1;
     if (b.deadline) return 1;

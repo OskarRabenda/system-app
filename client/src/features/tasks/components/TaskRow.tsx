@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { describeDeadline, priorityOf, type Task } from "../data";
+import { bandOf, describeDeadline, formatPriority, type Task } from "../data";
 
 type Props = {
   task: Task;
@@ -8,13 +8,13 @@ type Props = {
 };
 
 export default function TaskRow({ task, onToggle, onRemove }: Props) {
-  const priority = priorityOf(task.priority);
+  const band = bandOf(task.priority);
   const due = task.deadline ? describeDeadline(task.deadline) : null;
 
   return (
     <li
       className={`task ${task.done ? "is-done" : ""}`}
-      style={{ "--accent": priority.hue } as CSSProperties}
+      style={{ "--accent": band.hue } as CSSProperties}
     >
       <button
         type="button"
@@ -30,7 +30,9 @@ export default function TaskRow({ task, onToggle, onRemove }: Props) {
       <div className="task-main">
         <span className="task-title">{task.title}</span>
         <span className="task-meta">
-          <span className="task-priority">{priority.label}</span>
+          <span className="task-priority" title={`${band.label} priority`}>
+            {formatPriority(task.priority)}
+          </span>
           {due && (
             <>
               <span className="task-sep" aria-hidden="true">
