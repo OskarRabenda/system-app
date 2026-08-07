@@ -3,6 +3,7 @@ import NextMealCard from "./components/NextMealCard";
 import CalorieTracker from "./components/CalorieTracker";
 import MacroBreakdown from "./components/MacroBreakdown";
 import ExtrasCard from "./components/ExtrasCard";
+import SupplementsCard from "./components/SupplementsCard";
 import AddFoodPanel from "./components/AddFoodPanel";
 import Atmosphere from "../../components/Atmosphere";
 import {
@@ -12,6 +13,8 @@ import {
   DAILY_TARGET,
   loadExtras,
   saveExtras,
+  loadSupplements,
+  saveSupplements,
   totalExtras,
   type ExtraItem,
 } from "./data";
@@ -26,6 +29,7 @@ type Props = {
 export default function DietPage({ onBack }: Props) {
   const [now, setNow] = useState(() => new Date());
   const [extras, setExtras] = useState<ExtraItem[]>(() => loadExtras(new Date()));
+  const [taken, setTaken] = useState<string[]>(() => loadSupplements(new Date()));
   const [adding, setAdding] = useState(false);
 
   // Which meal is current depends on the clock, so keep it honest.
@@ -39,6 +43,10 @@ export default function DietPage({ onBack }: Props) {
     // `now` only matters for the day it falls in; re-saving on each tick is
     // cheap and keeps the stored day correct across midnight.
   }, [extras, now]);
+
+  useEffect(() => {
+    saveSupplements(now, taken);
+  }, [taken, now]);
 
   const current = currentMeal(now);
 
@@ -121,6 +129,14 @@ export default function DietPage({ onBack }: Props) {
           target={DAILY_TARGET.calories}
         />
         <MacroBreakdown consumed={consumed} target={DAILY_TARGET} />
+        <SupplementsCard
+          taken={taken}
+          onToggle={(id) =>
+            setTaken((list) =>
+              list.includes(id) ? list.filter((x) => x !== id) : [...list, id],
+            )
+          }
+        />
         {extras.length > 0 && (
           <ExtrasCard
             extras={extras}

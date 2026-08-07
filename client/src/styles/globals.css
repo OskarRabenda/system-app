@@ -1217,6 +1217,106 @@ canvas {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- supplements ---------- */
+
+.supp-card {
+  grid-column: 1 / -1;
+}
+
+.supps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 720px) {
+  .supps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.supp {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+.supp.is-taken {
+  border-color: rgba(84, 240, 208, 0.35);
+  background: rgba(84, 240, 208, 0.07);
+}
+
+/* The whole row is the hit target, not just the 22px box. */
+.supp-label {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  cursor: pointer;
+}
+
+.supp-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.supp-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.supp.is-taken .supp-name {
+  color: var(--teal);
+}
+.supp-detail {
+  font-size: 0.72rem;
+  color: var(--fog);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Shared checkbox face, so the tasks button and this real input match. */
+.task-check,
+.check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--line-hi);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.check {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+.check:checked {
+  background: var(--teal);
+  border-color: transparent;
+}
+.check:checked::after {
+  content: "✓";
+  font-size: 0.75rem;
+  line-height: 1;
+  color: #052;
+}
+.check:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
 /* ---------- tasks ---------- */
 
 .task-stack {
@@ -1337,21 +1437,10 @@ canvas {
   text-decoration: line-through;
 }
 
+/* Box appearance comes from the shared .task-check/.check rule above. */
 .task-check {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
   font-size: 0.75rem;
   color: #052;
-  background: transparent;
-  border: 1px solid var(--line-hi);
-  border-radius: 6px;
-  cursor: pointer;
-  transition:
-    background 0.18s ease,
-    border-color 0.18s ease;
 }
 .task-check[aria-checked="true"] {
   background: var(--teal);

@@ -171,10 +171,12 @@ export function totalExtras(extras: ExtraItem[]): Macros {
   return extras.reduce((sum, e) => addMacros(sum, macrosOf(e)), EMPTY_MACROS);
 }
 
-/* Extras are per-day, so the key rolls over at midnight and yesterday's
-   additions never leak into today's totals. */
-const dayKey = (d: Date) =>
-  `system.diet.extras.${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+/* Both extras and supplements are per-day, so their keys roll over at midnight
+   and yesterday's entries never leak into today. */
+const dayStamp = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+const dayKey = (d: Date) => `system.diet.extras.${dayStamp(d)}`;
 
 export function loadExtras(day: Date): ExtraItem[] {
   try {
@@ -190,6 +192,36 @@ export function saveExtras(day: Date, extras: ExtraItem[]): void {
     localStorage.setItem(dayKey(day), JSON.stringify(extras));
   } catch {
     // Storage unavailable (private mode, quota) — extras just won't persist.
+  }
+}
+
+/* ---------- daily supplements ---------- */
+
+export type Supplement = { id: string; name: string; detail: string };
+
+export const SUPPLEMENTS: Supplement[] = [
+  { id: "vitamin-d", name: "Vitamin D", detail: "with a meal containing fat" },
+  { id: "vitamin-c", name: "Vitamin C", detail: "any time of day" },
+  { id: "vitamin-b12", name: "Vitamin B12", detail: "best on an empty stomach" },
+];
+
+const suppKey = (d: Date) => `system.diet.supplements.${dayStamp(d)}`;
+
+/** Ids taken today. Absent ids are simply not taken yet. */
+export function loadSupplements(day: Date): string[] {
+  try {
+    const raw = localStorage.getItem(suppKey(day));
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveSupplements(day: Date, taken: string[]): void {
+  try {
+    localStorage.setItem(suppKey(day), JSON.stringify(taken));
+  } catch {
+    // Storage unavailable — the day's ticks just won't persist.
   }
 }
 
