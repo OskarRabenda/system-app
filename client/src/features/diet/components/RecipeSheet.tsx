@@ -109,9 +109,17 @@ export default function RecipeSheet({ meal, onClose }: Props) {
                 </span>
               </h3>
               <ul className="ingredients">
-                {r.ingredients.map((item, i) => (
-                  <li key={i}>{scaleIngredient(item, factor)}</li>
-                ))}
+                {r.ingredients.map((item, i) =>
+                  // The recipe's own groupings ("Sauce:", "To serve:") arrive
+                  // as amount-less entries; they head a group, not a bullet.
+                  item.endsWith(":") ? (
+                    <li key={i} className="ingredient-group">
+                      {item}
+                    </li>
+                  ) : (
+                    <li key={i}>{scaleIngredient(item, factor)}</li>
+                  ),
+                )}
               </ul>
               {r.omitted.length > 0 && (
                 <p className="recipe-omit-note">
