@@ -1,5 +1,6 @@
 import GlassCard from "../../../components/ui/GlassCard";
 import { formatAway, formatWindow, type CurrentMeal } from "../data";
+import { mealIcon } from "../plan";
 
 export default function NextMealCard({ current }: { current: CurrentMeal }) {
   const { meal, status, minutesAway } = current;
@@ -42,19 +43,28 @@ export default function NextMealCard({ current }: { current: CurrentMeal }) {
 
         </div>
 
-        {plan?.image && (
-          <figure className="meal-photo">
-            <img
-              src={plan.image}
-              alt={plan.en || plan.pl}
-              loading="lazy"
-              // A moved or renamed upstream photo should leave no broken icon.
-              onError={(e) => {
-                e.currentTarget.closest("figure")?.remove();
-              }}
-            />
-          </figure>
-        )}
+        {plan &&
+          (plan.image ? (
+            <figure className="meal-photo">
+              <img
+                src={plan.image}
+                alt={plan.en || plan.pl}
+                loading="lazy"
+                // A missing file should fall back to the icon, not a broken image.
+                onError={(e) => {
+                  const figure = e.currentTarget.closest("figure");
+                  if (figure) {
+                    figure.classList.add("is-icon");
+                    figure.textContent = mealIcon(plan);
+                  }
+                }}
+              />
+            </figure>
+          ) : (
+            <figure className="meal-photo is-icon" aria-hidden="true">
+              {mealIcon(plan)}
+            </figure>
+          ))}
       </div>
 
       <dl className="meal-macros">

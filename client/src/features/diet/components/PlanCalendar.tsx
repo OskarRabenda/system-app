@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { PLAN } from "../plan";
+import { mealIcon, PLAN } from "../plan";
 import { formatWindow } from "../data";
 
 type Props = {
@@ -77,10 +77,18 @@ export default function PlanCalendar({ initialDay, onClose }: Props) {
                     src={m.image}
                     alt=""
                     loading="lazy"
-                    onError={(e) => e.currentTarget.remove()}
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      const span = document.createElement("span");
+                      span.className = "plan-thumb is-icon";
+                      span.textContent = mealIcon(m);
+                      el.replaceWith(span);
+                    }}
                   />
                 ) : (
-                  <span className="plan-thumb is-empty" aria-hidden="true" />
+                  <span className="plan-thumb is-icon" aria-hidden="true">
+                    {mealIcon(m)}
+                  </span>
                 )}
 
                 <div className="plan-what">

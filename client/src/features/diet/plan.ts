@@ -57,6 +57,39 @@ const loaded = Object.values(local)[0]?.PLAN;
 export const PLAN: WeekPlan = loaded ?? EXAMPLE;
 export const IS_REAL_PLAN = Boolean(loaded);
 
+/**
+ * Stand-in for meals with no recipe photo — the overnight oats and the
+ * evening snacks. Matched on the dish text in both languages, so it keeps
+ * working if the plan is regenerated, then falls back to the time of day.
+ */
+const ICON_RULES: [RegExp, string][] = [
+  [/oats|owsianka|porridge/i, "🥣"],
+  [/shake|koktajl|smoothie/i, "🥤"],
+  [/rice cakes|banana|apple|honey|wafle|banan|jab/i, "🍌"],
+  [/salmon|cod|fish|tuna|łoso|ryba|tuńczyk/i, "🐟"],
+  [/pork|beef|loin|schab|wołowin/i, "🥩"],
+  [/penne|pasta|makaron|spaghetti/i, "🍝"],
+  [/sandwich|kanapk|toast/i, "🥪"],
+  [/egg|jajk|avocado|awokado/i, "🥑"],
+  [/beetroot|barley|burak|kaszotto/i, "🥗"],
+];
+
+const SLOT_ICONS: Record<string, string> = {
+  Breakfast: "🥣",
+  Lunch: "🍽️",
+  Afternoon: "🥤",
+  Dinner: "🍽️",
+  "Evening snack": "🍎",
+};
+
+export function mealIcon(meal: PlannedMeal): string {
+  const text = `${meal.en} ${meal.pl}`;
+  for (const [pattern, icon] of ICON_RULES) {
+    if (pattern.test(text)) return icon;
+  }
+  return SLOT_ICONS[meal.slot] ?? "🍽️";
+}
+
 const DAY_CODES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 /** The plan for a given date, falling back to the first day if unmatched. */
