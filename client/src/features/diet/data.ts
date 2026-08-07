@@ -169,6 +169,29 @@ export function saveExtras(day: Date, extras: ExtraItem[]): void {
   }
 }
 
+/* ---------- calories burned ---------- */
+
+const burnedKey = (d: Date) => `system.diet.burned.${dayStamp(d)}`;
+
+/** Calories burned that day, which widen the day's allowance. */
+export function loadBurned(day: Date): number {
+  try {
+    const raw = localStorage.getItem(burnedKey(day));
+    const n = raw ? Number(raw) : 0;
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function saveBurned(day: Date, burned: number): void {
+  try {
+    localStorage.setItem(burnedKey(day), String(Math.max(0, Math.round(burned))));
+  } catch {
+    // Storage unavailable — the figure just won't persist.
+  }
+}
+
 /* ---------- daily supplements ---------- */
 
 export type Supplement = { id: string; name: string; detail: string };

@@ -12,9 +12,11 @@ const ROWS: Row[] = [
 export default function MacroBreakdown({
   consumed,
   target,
+  onOpenTrend,
 }: {
   consumed: Macros;
   target: Macros;
+  onOpenTrend: () => void;
 }) {
   const protPct =
     target.protein > 0
@@ -23,7 +25,22 @@ export default function MacroBreakdown({
 
   return (
     <GlassCard className="stat-card" accent="#7fd3ff">
-      <p className="stat-label">Protein</p>
+      <p className="stat-label">
+        Protein
+        <span className="stat-tools">
+          <button
+            type="button"
+            className="mini-btn"
+            onClick={onOpenTrend}
+            title="See the trend"
+            aria-label="See the macro trend"
+          >
+            <svg viewBox="0 0 16 12" aria-hidden="true">
+              <polyline points="1,10 5,6 8,8 15,2" />
+            </svg>
+          </button>
+        </span>
+      </p>
 
       <p className="macro-hero">
         <span className="macro-value">{consumed.protein}</span>

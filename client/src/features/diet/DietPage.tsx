@@ -7,6 +7,7 @@ import SupplementsCard from "./components/SupplementsCard";
 import AddFoodPanel from "./components/AddFoodPanel";
 import PlanCalendar from "./components/PlanCalendar";
 import RecipeSheet from "./components/RecipeSheet";
+import TrendSheet from "./components/TrendSheet";
 import { dayFor, type PlannedMeal } from "./plan";
 import Atmosphere from "../../components/Atmosphere";
 import {
@@ -18,6 +19,8 @@ import {
   saveExtras,
   loadSupplements,
   saveSupplements,
+  loadBurned,
+  saveBurned,
   totalExtras,
   type ExtraItem,
 } from "./data";
@@ -36,6 +39,8 @@ export default function DietPage({ onBack }: Props) {
   const [adding, setAdding] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
   const [recipeOf, setRecipeOf] = useState<PlannedMeal | null>(null);
+  const [trend, setTrend] = useState<"calories" | "macros" | null>(null);
+  const [burned, setBurned] = useState(() => loadBurned(new Date()));
 
   // Which meal is current depends on the clock, so keep it honest.
   useEffect(() => {
@@ -52,6 +57,10 @@ export default function DietPage({ onBack }: Props) {
   useEffect(() => {
     saveSupplements(now, taken);
   }, [taken, now]);
+
+  useEffect(() => {
+    saveBurned(now, burned);
+  }, [burned, now]);
 
   const current = currentMeal(now);
 
@@ -146,8 +155,15 @@ export default function DietPage({ onBack }: Props) {
         <CalorieTracker
           consumed={consumed.calories}
           target={DAILY_TARGET.calories}
+          burned={burned}
+          onBurnedChange={setBurned}
+          onOpenTrend={() => setTrend("calories")}
         />
-        <MacroBreakdown consumed={consumed} target={DAILY_TARGET} />
+        <MacroBreakdown
+          consumed={consumed}
+          target={DAILY_TARGET}
+          onOpenTrend={() => setTrend("macros")}
+        />
         <SupplementsCard
           taken={taken}
           onToggle={(id) =>
@@ -173,6 +189,8 @@ export default function DietPage({ onBack }: Props) {
           onOpenRecipe={(meal) => setRecipeOf(meal)}
         />
       )}
+
+      {trend && <TrendSheet mode={trend} onClose={() => setTrend(null)} />}
 
       {recipeOf && (
         <RecipeSheet meal={recipeOf} onClose={() => setRecipeOf(null)} />

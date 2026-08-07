@@ -2240,3 +2240,230 @@ canvas {
 .ingredients .ingredient-group:first-child {
   margin-top: 0;
 }
+
+/* ---------- trends ---------- */
+
+.stat-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.stat-tools {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+.mini-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  font-size: 0.78rem;
+  color: var(--fog);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+.mini-btn svg {
+  width: 15px;
+  height: 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mini-btn:hover,
+.mini-btn:focus-visible {
+  color: var(--teal);
+  border-color: rgba(84, 240, 208, 0.45);
+}
+.mini-btn:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.burn-row {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0 0 0.9rem;
+}
+.burn-field {
+  flex: 1 1 auto;
+}
+.burn-field input {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line-hi);
+  border-radius: 9px;
+  font-variant-numeric: tabular-nums;
+}
+.burn-chip {
+  margin-left: 0.55rem;
+  padding: 0.15em 0.5em;
+  font-size: 0.74rem;
+  color: #ffb26b;
+  background: rgba(255, 178, 107, 0.12);
+  border-radius: 6px;
+}
+
+.trend-sheet {
+  width: min(820px, 100%);
+}
+.trend-controls {
+  display: flex;
+  justify-content: flex-start;
+}
+.range-tabs {
+  display: flex;
+  gap: 0.35rem;
+}
+.range-tabs .day-tab {
+  flex: 0 0 auto;
+  padding: 0.45rem 0.9rem;
+}
+
+.macro-picker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+@media (max-width: 560px) {
+  .macro-picker {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.macro-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.7rem;
+  font: inherit;
+  text-align: left;
+  color: var(--fog);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+.macro-choice .swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--hue);
+  opacity: 0.45;
+  flex: none;
+}
+.macro-choice.is-on {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--hue) 55%, transparent);
+  background: color-mix(in srgb, var(--hue) 12%, transparent);
+}
+.macro-choice.is-on .swatch {
+  opacity: 1;
+}
+.macro-choice-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.macro-choice-val {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: var(--fog);
+  font-variant-numeric: tabular-nums;
+}
+.macro-choice:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.chart {
+  margin: 0;
+}
+.chart svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.chart .grid {
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 1;
+}
+.chart .axis {
+  fill: var(--fog);
+  font-size: 10px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  text-anchor: middle;
+}
+.chart .axis:first-of-type {
+  text-anchor: end;
+}
+.chart .target-line {
+  stroke: var(--teal);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  opacity: 0.55;
+}
+.chart .target-label {
+  fill: var(--teal);
+  font-size: 9px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  text-anchor: end;
+  opacity: 0.8;
+}
+.chart .line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chart .crosshair {
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 1;
+}
+.chart .dot {
+  stroke: var(--panel);
+  stroke-width: 2;
+}
+
+.chart-caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  margin: 0.7rem 0 0;
+  font-size: 0.8rem;
+  color: var(--fog);
+  min-height: 1.4rem;
+}
+.chart-caption strong {
+  color: var(--text);
+}
+.chart-read {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-variant-numeric: tabular-nums;
+}
+.chart-read i {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+.chart-hint {
+  font-style: italic;
+  opacity: 0.8;
+}
