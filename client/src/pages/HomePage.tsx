@@ -8,12 +8,12 @@ const FONT = "/fonts/helvetiker_bold.typeface.json";
 const SIZE = 1.25;
 const DEPTH = 0.44; // extrusion depth
 
-const APPEAR = 0.35; // scales up into view
-const HOLD = 0.3; // a beat before it goes
-const SPIN = 0.9; // one turn, decelerating into place
+const APPEAR = 0.22; // scales up into view
+const HOLD = 0.12; // a beat before it goes
+const SPIN = 0.55; // one turn, decelerating into place
 
 /** Second at which the S has come to rest — drives the app's phase timing. */
-export const HERO_SETTLED = HOLD + SPIN + 0.15;
+export const HERO_SETTLED = HOLD + SPIN + 0.08;
 
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
 
