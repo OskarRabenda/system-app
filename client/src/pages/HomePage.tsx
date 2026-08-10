@@ -10,7 +10,8 @@ const DEPTH = 0.44; // extrusion depth
 
 const APPEAR = 0.22; // scales up into view
 const HOLD = 0.12; // a beat before it goes
-const SPIN = 0.55; // one turn, decelerating into place
+const SPIN = 0.68; // two turns, decelerating into place
+const TURNS = 2;
 
 /** Second at which the S has come to rest — drives the app's phase timing. */
 export const HERO_SETTLED = HOLD + SPIN + 0.08;
@@ -52,7 +53,7 @@ function Letter() {
     const since = t - HOLD;
     if (since > 0) {
       mesh.current.rotation.y =
-        spinEase(clamp(since / SPIN, 0, 1)) * Math.PI * 2;
+        spinEase(clamp(since / SPIN, 0, 1)) * Math.PI * 2 * TURNS;
     }
   });
 
