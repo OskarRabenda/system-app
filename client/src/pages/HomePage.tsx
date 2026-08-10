@@ -10,19 +10,27 @@ const DEPTH = 0.44; // extrusion depth
 
 const APPEAR = 0.22; // scales up into view
 const HOLD = 0.12; // a beat before it goes
-const SPIN = 0.68; // two turns, decelerating into place
+const SPIN = 1.05; // two turns, decelerating into place
 const TURNS = 2;
 
-/** Second at which the S has come to rest — drives the app's phase timing. */
-export const HERO_SETTLED = HOLD + SPIN + 0.08;
+/*
+ * Hand over while the S is still easing through its last degree or two, rather
+ * than after it has stopped. Waiting for the full spin left a beat where
+ * nothing moved — the deceleration is so gentle at the end that the letter
+ * looks parked while the transition is still pending.
+ */
+const HANDOFF = 0.72;
+
+/** Second at which the reveal takes over — drives the app's phase timing. */
+export const HERO_SETTLED = HOLD + SPIN * HANDOFF;
 
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
 
 /* Fast off the mark, easing down to a stop. Monotonic on purpose — it never
-   passes the full turn and rocks back. Cubic rather than quartic: a steeper
-   power leaves a long tail where the last degree crawls and the spin looks
-   stalled while the transition waits. */
-const spinEase = (t: number) => 1 - Math.pow(1 - t, 3);
+   passes the full turn and rocks back. Quartic gives a harder launch and a
+   longer glide than cubic; its slow tail is no longer a problem now the
+   reveal starts before the spin fully finishes. */
+const spinEase = (t: number) => 1 - Math.pow(1 - t, 4);
 
 const eOut = (t: number) => 1 - Math.pow(1 - t, 3);
 
