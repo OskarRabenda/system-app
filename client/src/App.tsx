@@ -4,9 +4,10 @@ import WaveReveal, { type Origin } from "./components/WaveReveal";
 import DashboardPage from "./features/dashboard/DashboardPage";
 import DietPage from "./features/diet/DietPage";
 import TasksPage from "./features/tasks/TasksPage";
+import WorkoutsPage from "./features/workouts/WorkoutsPage";
 import type { SectionId } from "./features/dashboard/sections";
 
-type Screen = "hero" | "dashboard" | "diet" | "tasks";
+type Screen = "hero" | "dashboard" | "diet" | "tasks" | "workouts";
 
 const BEAT = 180; // pause after the S lands, before the reveal takes over
 
@@ -47,11 +48,11 @@ export default function App() {
   };
 
   const handleSelect = (id: SectionId, from: Origin) => {
-    if (id === "diet" || id === "tasks") {
+    if (id === "diet" || id === "tasks" || id === "workouts") {
       go(id, from);
       return;
     }
-    // Sleep and workouts have no screen yet.
+    // Sleep has no screen yet.
     console.log(`[system] section selected: ${id}`);
   };
 
@@ -61,6 +62,8 @@ export default function App() {
       return <DietPage onBack={(from) => go("dashboard", from)} />;
     if (which === "tasks")
       return <TasksPage onBack={(from) => go("dashboard", from)} />;
+    if (which === "workouts")
+      return <WorkoutsPage onBack={(from) => go("dashboard", from)} />;
     return (
       <DashboardPage
         onSelect={handleSelect}
