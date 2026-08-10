@@ -79,12 +79,6 @@ export default function WorkoutsPage({ onBack }: Props) {
             <span className="start-time">{formatElapsed(elapsed)}</span>
           )}
         </button>
-
-        <p className="workout-hint">
-          {running
-            ? "Session running."
-            : "Open the set to see what today holds."}
-        </p>
       </div>
 
       {setOpen && <WorkoutSetSheet onClose={() => setSetOpen(false)} />}

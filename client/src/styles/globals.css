@@ -2494,70 +2494,115 @@ canvas {
   min-height: 46vh;
 }
 
+/* A frosted disc, built from the same parts as the glass cards — translucent
+   fill, a specular sweep off the top-left, a light top edge — rather than a
+   solid teal blob that belonged to a different design. */
 .start-btn {
+  position: relative;
   display: grid;
   place-items: center;
-  gap: 0.3rem;
+  align-content: center;
+  gap: 0.2rem;
   width: 208px;
   height: 208px;
   font: inherit;
-  color: #052;
-  background: radial-gradient(circle at 50% 35%, #7dffe6, var(--teal) 70%);
-  border: 0;
+  color: var(--text);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.03)
+  );
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
   cursor: pointer;
+  overflow: hidden;
   box-shadow:
-    0 0 0 1px rgba(84, 240, 208, 0.4),
-    0 0 60px rgba(84, 240, 208, 0.28),
-    0 18px 50px rgba(0, 0, 0, 0.5);
+    0 18px 50px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+.start-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    150deg,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.04) 38%,
+    transparent 64%
+  );
+}
+/* The teal bloom sits under the glass, not painted on it. */
+.start-btn::after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 42%,
+    rgba(84, 240, 208, 0.22),
+    transparent 68%
+  );
+  transition: opacity 0.22s ease;
 }
 .start-btn:hover,
 .start-btn:focus-visible {
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(-2px);
+  border-color: rgba(84, 240, 208, 0.5);
   box-shadow:
-    0 0 0 1px rgba(84, 240, 208, 0.55),
-    0 0 80px rgba(84, 240, 208, 0.4),
-    0 20px 56px rgba(0, 0, 0, 0.55);
+    0 22px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    0 0 46px rgba(84, 240, 208, 0.18);
 }
 .start-btn:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 4px;
+  outline: 2px solid var(--teal);
+  outline-offset: 5px;
 }
 .start-btn:active {
   transform: translateY(0) scale(0.99);
 }
 
-/* Running reads as a live state, not another call to action. */
+/* Running is a live state: the edge lights and the bloom recedes, so the clock
+   is the brightest thing on the disc. */
 .start-btn.is-running {
-  color: var(--text);
-  background: linear-gradient(180deg, var(--panel-hi), var(--panel));
+  border-color: rgba(84, 240, 208, 0.6);
   box-shadow:
-    inset 0 0 0 2px rgba(84, 240, 208, 0.55),
-    0 0 46px rgba(84, 240, 208, 0.16),
-    0 18px 50px rgba(0, 0, 0, 0.5);
+    0 18px 50px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(84, 240, 208, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 40px rgba(84, 240, 208, 0.14);
+}
+.start-btn.is-running::after {
+  opacity: 0.4;
 }
 
 .start-label {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  position: relative;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+.start-btn.is-running .start-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.26em;
+  color: var(--fog);
 }
 .start-time {
+  position: relative;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 1.9rem;
+  font-size: 2rem;
   font-weight: 600;
-  color: var(--teal);
-  font-variant-numeric: tabular-nums;
-}
-
-.workout-hint {
-  margin: 0;
-  font-size: 0.86rem;
   color: var(--text);
-  opacity: 0.45;
+  font-variant-numeric: tabular-nums;
 }
 
 .set-sheet {
