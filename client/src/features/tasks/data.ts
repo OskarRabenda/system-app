@@ -30,6 +30,10 @@ export function validateDeadline(
   return null;
 }
 
+/** Used when a task is jotted down without one — mid-band, so it neither
+ *  jumps the queue nor sinks below tasks that were given a real weight. */
+export const DEFAULT_PRIORITY: Priority = 0.5;
+
 export type PriorityBand = { label: string; hue: string };
 
 /** Bands only drive colour and a scannable word; the stored value is the number. */

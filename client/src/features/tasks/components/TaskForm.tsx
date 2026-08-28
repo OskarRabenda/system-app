@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import GlassCard from "../../../components/ui/GlassCard";
 import {
   bandOf,
+  DEFAULT_PRIORITY,
   parsePriority,
   todayISO,
   validateDeadline,
@@ -36,16 +37,20 @@ export default function TaskForm({ onSubmit, onCancel }: Props) {
   const band = parsed.ok ? bandOf(parsed.value) : null;
 
   const deadlineError = validateDeadline(deadline);
-  const canSave = title.trim().length > 0 && parsed.ok && !deadlineError;
+  /* A name is the only thing actually required. Priority and deadline are
+     blocking only when they have been filled in wrongly — leaving them empty
+     is a normal way to jot something down. */
+  const canSave =
+    title.trim().length > 0 && !deadlineError && (text === "" || parsed.ok);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    if (!canSave || !parsed.ok) return;
+    if (!canSave) return;
     onSubmit({
       title: title.trim(),
       description: description.trim() || undefined,
       deadline: deadline || undefined,
-      priority: parsed.value,
+      priority: parsed.ok ? parsed.value : DEFAULT_PRIORITY,
     });
   };
 
@@ -115,7 +120,7 @@ export default function TaskForm({ onSubmit, onCancel }: Props) {
                 ? parsed.error
                 : band
                   ? `${band.label} priority`
-                  : "Greater than 0, up to 1"}
+                  : "0 to 1 (optional)"}
             </span>
           </label>
         </div>
