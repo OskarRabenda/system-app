@@ -11,6 +11,8 @@ export type Task = {
   priority: Priority;
   done: boolean;
   createdAt: string;
+  /** Set when it was checked off, so history reads newest-first. */
+  completedAt?: string;
 };
 
 /** Local calendar date as YYYY-MM-DD — not toISOString(), which is UTC and
@@ -102,6 +104,13 @@ export function saveTasks(tasks: Task[]): void {
   } catch {
     // Storage unavailable (private mode, quota) — tasks just won't persist.
   }
+}
+
+/** Most recently finished first — history reads as a log. */
+export function sortHistory(tasks: Task[]): Task[] {
+  return [...tasks].sort((a, b) =>
+    (b.completedAt ?? b.createdAt).localeCompare(a.completedAt ?? a.createdAt),
+  );
 }
 
 /** Open tasks first, then most urgent, then by deadline, then newest. */

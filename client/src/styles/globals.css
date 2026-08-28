@@ -2679,3 +2679,97 @@ canvas {
 .workouts .screen-title .plan-btn {
   margin-left: auto;
 }
+
+/* ---------- task history & row actions ---------- */
+
+.task-actions {
+  flex: none;
+  display: inline-flex;
+  gap: 0.35rem;
+}
+.edit-icon {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+.task-restore {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  font-size: 0.85rem;
+  color: var(--fog);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+.task-restore:hover,
+.task-restore:focus-visible {
+  color: var(--teal);
+  border-color: rgba(84, 240, 208, 0.45);
+}
+.task-restore:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 100%;
+}
+.history-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+  padding: 0.5rem 0.9rem;
+  font: inherit;
+  font-size: 0.84rem;
+  color: var(--fog);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+.history-toggle:hover,
+.history-toggle:focus-visible {
+  color: var(--text);
+  border-color: var(--line-hi);
+}
+.history-toggle:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+.history-caret {
+  font-size: 0.7rem;
+}
+.history-count {
+  padding: 0.1em 0.5em;
+  font-size: 0.74rem;
+  color: var(--teal);
+  background: rgba(84, 240, 208, 0.12);
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Finished work is reference, not the focus of the screen. */
+.history .task {
+  opacity: 0.62;
+}
+.history .task .task-title {
+  text-decoration: line-through;
+}

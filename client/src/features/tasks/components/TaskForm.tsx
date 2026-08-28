@@ -3,10 +3,12 @@ import GlassCard from "../../../components/ui/GlassCard";
 import {
   bandOf,
   DEFAULT_PRIORITY,
+  formatPriority,
   parsePriority,
   todayISO,
   validateDeadline,
   type Priority,
+  type Task,
 } from "../data";
 
 export type NewTask = {
@@ -17,15 +19,20 @@ export type NewTask = {
 };
 
 type Props = {
+  /** Prefills the form; its presence turns this into an edit. */
+  initial?: Task;
   onSubmit: (task: NewTask) => void;
   onCancel: () => void;
 };
 
-export default function TaskForm({ onSubmit, onCancel }: Props) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [deadline, setDeadline] = useState("");
-  const [priority, setPriority] = useState("");
+export default function TaskForm({ initial, onSubmit, onCancel }: Props) {
+  const editing = Boolean(initial);
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [deadline, setDeadline] = useState(initial?.deadline ?? "");
+  const [priority, setPriority] = useState(
+    initial ? formatPriority(initial.priority) : "",
+  );
 
   const parsed = parsePriority(priority);
   const text = priority.trim().replace(",", ".");
@@ -36,7 +43,10 @@ export default function TaskForm({ onSubmit, onCancel }: Props) {
   const showError = text !== "" && !midType && !parsed.ok;
   const band = parsed.ok ? bandOf(parsed.value) : null;
 
-  const deadlineError = validateDeadline(deadline);
+  // An edit keeps whatever deadline it already had, even if that date has
+  // since passed — otherwise an overdue task could never be edited.
+  const deadlineError =
+    editing && deadline === initial?.deadline ? null : validateDeadline(deadline);
   /* A name is the only thing actually required. Priority and deadline are
      blocking only when they have been filled in wrongly — leaving them empty
      is a normal way to jot something down. */
@@ -130,7 +140,7 @@ export default function TaskForm({ onSubmit, onCancel }: Props) {
             Cancel
           </button>
           <button type="submit" className="add-btn" disabled={!canSave}>
-            Add task
+            {editing ? "Save changes" : "Add task"}
           </button>
         </div>
       </form>
