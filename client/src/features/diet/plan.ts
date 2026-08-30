@@ -87,13 +87,15 @@ export const IS_REAL_PLAN = Boolean(loaded);
 const ICON_RULES: [RegExp, string][] = [
   [/oats|owsianka|porridge/i, "🥣"],
   [/shake|koktajl|smoothie/i, "🥤"],
-  [/rice cakes|banana|apple|honey|wafle|banan|jab/i, "🍌"],
+  // The dish rules come first: fruit words like "honey" and "apple" turn up
+  // inside a sauce or a topping, and would otherwise claim the whole meal.
   [/salmon|cod|fish|tuna|łoso|ryba|tuńczyk/i, "🐟"],
   [/pork|beef|loin|schab|wołowin/i, "🥩"],
   [/penne|pasta|makaron|spaghetti/i, "🍝"],
   [/sandwich|kanapk|toast/i, "🥪"],
   [/egg|jajk|avocado|awokado/i, "🥑"],
   [/beetroot|barley|burak|kaszotto/i, "🥗"],
+  [/rice cakes|banana|apple|honey|wafle|banan|jab/i, "🍌"],
 ];
 
 const SLOT_ICONS: Record<string, string> = {

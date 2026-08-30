@@ -129,8 +129,8 @@ export default function RecipeSheet({ meal, onClose }: Props) {
                       .map((item) => scaleIngredient(item, factor))
                       .join(", ")}
                   </strong>{" "}
-                  — skip it where the method mentions it. That is why the macros
-                  here are below the published recipe.
+                  — skip it where the method mentions it. The macros here are
+                  for the plan&rsquo;s version, not the published one.
                 </p>
               )}
               {scaled && r.yield && (
